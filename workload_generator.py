@@ -5,14 +5,11 @@ import matplotlib.pyplot as plt
 from concurrent.futures import ThreadPoolExecutor
 import uuid
 
-URL = "https://factorization-service-cloud.orangestone-19b7850d.italynorth.azurecontainerapps.io/compute"
+URL = "https://serverless-app-1070589510446.europe-west8.run.app/compute"
 #https://factorization-service-cloud.orangestone-19b7850d.italynorth.azurecontainerapps.io
 #https://serverless-app-1070589510446.europe-west8.run.app
 def send_request(req_id):
     """ Sends a request to the Cloud Run service and logs timing details. """
-
-#52345
-    #32345
     start_time = time.time()
     try:
         response = requests.get(URL, params={"n": "62340", "req_id": req_id}, timeout=650)
@@ -27,7 +24,7 @@ def send_request(req_id):
 def test_load(requests_per_second):
     """ Tests the system under load and returns performance metrics. """
     total_start_time = time.time()
-
+    # it spawns multiple threads, each making an HTTP request in parallel.
     with ThreadPoolExecutor(max_workers=requests_per_second) as executor:
         req_ids = [str(uuid.uuid4()) for _ in range(requests_per_second)]
         times = list(executor.map(send_request, req_ids))
@@ -35,7 +32,7 @@ def test_load(requests_per_second):
     total_end_time = time.time()
     total_time = total_end_time - total_start_time
 
-    # Filter out failed requests
+    # filter out failed requests
     successful_times = [t for t in times if t is not None]
 
     if not successful_times:
@@ -56,7 +53,7 @@ def run_load_tests():
     throughputs = []
     speedups = []
 
-    # Get baseline metrics
+    # baseline metrics
     baseline_exec_time, baseline_throughput = test_load(1)
     print(f"[BASELINE] Execution Time: {baseline_exec_time:.2f}s, Throughput: {baseline_throughput:.2f} req/s")
 
@@ -73,7 +70,7 @@ def run_load_tests():
 
         print(f"[RESULT] {reqs} RPS -> Execution Time: {exec_time:.2f}s, Throughput: {throughput:.2f} req/s")
 
-    # Create plots
+    # create plots
     plt.figure(figsize=(15, 5))
 
     # Execution Time plot
